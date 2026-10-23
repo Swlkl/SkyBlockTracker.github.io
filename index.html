@@ -3,85 +3,90 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bazaar Compass – Conseils et flips pour Hypixel SkyBlock</title>
+<title>Bazaar Compass – Profil et flips Hypixel SkyBlock</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="top">
-  <div>
-    <h1>Bazaar Compass</h1>
-    <p class="sub">Trouve les flips rentables du Bazaar SkyBlock, adaptés à ton niveau et à ton budget.</p>
+<div class="shell">
+<aside class="side">
+  <h1>Bazaar Compass</h1>
+  <nav class="tabs" role="tablist">
+    <button data-tab="profile">👤 Mon profil</button>
+    <button class="on" data-tab="flips">📈 Flips conseillés</button>
+    <button data-tab="all">🧺 Tout le Bazaar</button>
+    <button data-tab="fav">★ Favoris <span id="favCount"></span></button>
+    <button data-tab="calc">🧮 Calculateur</button>
+  </nav>
+  <div class="box">
+    <span class="lbl">Niveau de jeu</span>
+    <div class="levels" id="levels" role="radiogroup"></div>
+    <label>Budget (coins)<input id="budget" type="text" inputmode="numeric" value="100k"></label>
+    <label>Taxe de vente
+      <select id="tax"><option value="1.25">1,25 %</option><option value="1.125">1,125 % (Flipper I)</option><option value="1">1 % (Flipper II)</option></select>
+    </label>
   </div>
-  <div class="status">
-    <span id="status">Chargement…</span>
-    <button id="refresh" title="Actualiser maintenant">Actualiser</button>
-    <button id="theme" title="Changer de thème">Thème</button>
-  </div>
-</header>
+  <div class="status"><span id="status">Chargement…</span>
+    <div><button id="refresh">Actualiser</button> <button id="theme">Thème</button></div></div>
+</aside>
 
-<section class="profile" aria-label="Ton profil">
-  <div class="levels" id="levels" role="radiogroup" aria-label="Niveau de jeu"></div>
-  <label>Budget (coins)
-    <input id="budget" type="text" inputmode="numeric" value="500k">
-  </label>
-  <label>Taxe de vente (%)
-    <select id="tax">
-      <option value="1.25">1,25 % (par défaut)</option>
-      <option value="1.125">1,125 % (Bazaar Flipper I)</option>
-      <option value="1">1 % (Bazaar Flipper II)</option>
-    </select>
-  </label>
-</section>
-
-<section id="advice" class="advice"></section>
-
-<nav class="tabs" role="tablist">
-  <button class="on" data-tab="flips">Flips conseillés</button>
-  <button data-tab="all">Tout le Bazaar</button>
-  <button data-tab="fav">Favoris <span id="favCount"></span></button>
-  <button data-tab="calc">Calculateur</button>
-</nav>
-
-<main>
-  <div id="tableTools" class="tools">
-    <input id="search" type="search" placeholder="Rechercher un objet (ex : enchanted)">
-    <label>Marge min. <input id="minPct" type="number" value="2" min="0" step="0.5"> %</label>
-    <label class="chk"><input id="hideSus" type="checkbox" checked> Masquer les prix suspects</label>
-    <button id="csv">Exporter en CSV</button>
-  </div>
-  <div class="wrap" id="tableWrap"></div>
-
-  <div id="calc" hidden class="calc">
-    <h2>Calculateur de flip</h2>
-    <p class="sub">Entre un prix d'achat et de vente pour connaître ton bénéfice réel après taxe.</p>
-    <div class="grid">
-      <label>Prix d'achat (ordre d'achat)<input id="cBuy" type="text" value="1000"></label>
-      <label>Prix de vente (ordre de vente)<input id="cSell" type="text" value="1100"></label>
-      <label>Quantité<input id="cQty" type="text" value="1k"></label>
+<div class="content">
+  <section id="profile" hidden>
+    <div id="connect" class="card">
+      <h2>Connecte ton profil SkyBlock</h2>
+      <p class="sub">Sans mot de passe Minecraft : une clé API Hypixel en lecture seule suffit.</p>
+      <div class="grid">
+        <label>Pseudo Minecraft (ou UUID)<input id="pfName" autocomplete="off"></label>
+        <label>Clé API Hypixel<input id="pfKey" type="password" autocomplete="off" placeholder="xxxxxxxx-xxxx-…"></label>
+      </div>
+      <div class="tools"><button id="pfGo" class="primary">Afficher ma progression</button>
+        <label class="chk"><input type="checkbox" id="pfRem"> Se souvenir sur cet appareil</label>
+        <a href="https://developer.hypixel.net/" target="_blank" rel="noopener">Obtenir une clé</a></div>
+      <p id="pfMsg" class="msg" role="status"></p>
+      <details><summary>Est-ce sécurisé ?</summary>
+        <p class="sub">Ta clé reste dans ton navigateur (session uniquement, sauf si tu coches « se souvenir ») et part seulement vers api.hypixel.net. Aucun serveur intermédiaire. Elle donne accès à des données de jeu, pas à ton compte : si tu as un doute, régénère-la sur le portail. Ne la partage jamais. Ton pseudo est converti en UUID via playerdb.co.</p></details>
     </div>
-    <div id="cOut" class="out"></div>
-  </div>
-</main>
+    <div id="pfBody"></div>
+  </section>
 
-<section class="alerts">
-  <h2>Alerte de prix</h2>
-  <p class="sub">Garde cet onglet ouvert : tu seras prévenu quand un objet atteint ton prix.</p>
-  <div class="tools">
-    <select id="alItem"></select>
-    <select id="alDir"><option value="below">descend sous</option><option value="above">monte au-dessus de</option></select>
-    <input id="alPrice" type="text" placeholder="Prix (ex : 12k)">
-    <button id="alAdd">Ajouter l'alerte</button>
-  </div>
-  <ul id="alList"></ul>
-</section>
+  <section id="advice" class="advice"></section>
 
-<footer>
-  Données : API publique Hypixel (Bazaar), actualisées toutes les 60 s. Projet non affilié à Hypixel Inc.
-  Les estimations ne garantissent aucun gain : les prix bougent vite.
-</footer>
+  <main>
+    <div id="tableTools" class="tools">
+      <input id="search" type="search" placeholder="Rechercher un objet">
+      <label>Marge min. <input id="minPct" type="number" value="2" min="0" step="0.5"> %</label>
+      <label class="chk"><input id="hideSus" type="checkbox" checked> Masquer les prix suspects</label>
+      <button id="csv">Exporter CSV</button>
+    </div>
+    <div class="wrap" id="tableWrap"></div>
+    <div id="calc" hidden class="card">
+      <h2>Calculateur de flip</h2>
+      <div class="grid">
+        <label>Prix d'achat<input id="cBuy" type="text" value="1000"></label>
+        <label>Prix de vente<input id="cSell" type="text" value="1100"></label>
+        <label>Quantité<input id="cQty" type="text" value="1k"></label>
+      </div>
+      <div id="cOut" class="out"></div>
+    </div>
+  </main>
+
+  <section class="alerts card">
+    <h2>Alerte de prix</h2>
+    <p class="sub">Garde cet onglet ouvert pour être prévenu.</p>
+    <div class="tools">
+      <select id="alItem"></select>
+      <select id="alDir"><option value="below">descend sous</option><option value="above">monte au-dessus de</option></select>
+      <input id="alPrice" type="text" placeholder="Prix (ex : 12k)">
+      <button id="alAdd">Ajouter</button>
+    </div>
+    <ul id="alList"></ul>
+  </section>
+  <footer>Données : API publique Hypixel. Projet non affilié à Hypixel Inc. Les estimations ne garantissent aucun gain.</footer>
+</div>
+</div>
 <script src="app.js"></script>
+<script src="profile.js"></script>
 </body>
 </html>

@@ -123,7 +123,7 @@ $("#levels").onclick = e => { const l = e.target.dataset.l; if (!l) return;
   renderAdvice(); compute(); render(); };
 document.querySelector(".tabs").onclick = e => { const t = e.target.closest("button")?.dataset.tab; if (!t) return;
   state.tab = t; document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
-  $("#calc").hidden = t !== "calc"; $("#tableWrap").hidden = $("#tableTools").hidden = t === "calc"; render(); };
+  const nt = t === "calc" || t === "profile"; $("#profile").hidden = t !== "profile"; $("#advice").hidden = nt; $("#calc").hidden = t !== "calc"; $("#tableWrap").hidden = $("#tableTools").hidden = nt; render(); };
 $("#tableWrap").onclick = e => {
   const th = e.target.closest("th[data-k]"), st = e.target.closest(".star");
   if (th) { state.asc = state.sort === th.dataset.k ? !state.asc : false; state.sort = th.dataset.k; render(); }
