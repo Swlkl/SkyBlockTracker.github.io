@@ -13,13 +13,19 @@
 <div class="shell">
 <aside class="side">
   <h1>Bazaar Compass</h1>
-  <nav class="tabs" role="tablist">
-    <button data-tab="profile">👤 Mon profil</button>
-    <button class="on" data-tab="flips">📈 Flips conseillés</button>
-    <button data-tab="all">🧺 Tout le Bazaar</button>
-    <button data-tab="fav">★ Favoris <span id="favCount"></span></button>
-    <button data-tab="calc">🧮 Calculateur</button>
-  </nav>
+  <section id="profile">
+    <div id="connect">
+      <label>Pseudo Minecraft (ou UUID)<input id="pfName" autocomplete="off"></label>
+      <label>Clé API Hypixel<input id="pfKey" type="password" autocomplete="off" placeholder="xxxxxxxx-xxxx-…"></label>
+      <button id="pfGo" class="primary">Afficher ma progression</button>
+      <label class="chk"><input type="checkbox" id="pfRem"> Se souvenir sur cet appareil</label>
+      <a href="https://developer.hypixel.net/" target="_blank" rel="noopener">Obtenir une clé API</a>
+      <p id="pfMsg" class="msg" role="status"></p>
+      <details><summary>Est-ce sécurisé ?</summary>
+        <p class="sub">Ta clé reste dans ton navigateur (session, ou appareil si tu coches « se souvenir ») et part seulement vers api.hypixel.net. Aucun mot de passe Minecraft n'est demandé. Ne la partage jamais : tu peux la régénérer sur le portail. Ton pseudo est converti en UUID via playerdb.co.</p></details>
+    </div>
+    <div id="pfBody"></div>
+  </section>
   <div class="box">
     <span class="lbl">Niveau de jeu</span>
     <div class="levels" id="levels" role="radiogroup"></div>
@@ -33,24 +39,12 @@
 </aside>
 
 <div class="content">
-  <section id="profile" hidden>
-    <div id="connect" class="card">
-      <h2>Connecte ton profil SkyBlock</h2>
-      <p class="sub">Sans mot de passe Minecraft : une clé API Hypixel en lecture seule suffit.</p>
-      <div class="grid">
-        <label>Pseudo Minecraft (ou UUID)<input id="pfName" autocomplete="off"></label>
-        <label>Clé API Hypixel<input id="pfKey" type="password" autocomplete="off" placeholder="xxxxxxxx-xxxx-…"></label>
-      </div>
-      <div class="tools"><button id="pfGo" class="primary">Afficher ma progression</button>
-        <label class="chk"><input type="checkbox" id="pfRem"> Se souvenir sur cet appareil</label>
-        <a href="https://developer.hypixel.net/" target="_blank" rel="noopener">Obtenir une clé</a></div>
-      <p id="pfMsg" class="msg" role="status"></p>
-      <details><summary>Est-ce sécurisé ?</summary>
-        <p class="sub">Ta clé reste dans ton navigateur (session uniquement, sauf si tu coches « se souvenir ») et part seulement vers api.hypixel.net. Aucun serveur intermédiaire. Elle donne accès à des données de jeu, pas à ton compte : si tu as un doute, régénère-la sur le portail. Ne la partage jamais. Ton pseudo est converti en UUID via playerdb.co.</p></details>
-    </div>
-    <div id="pfBody"></div>
-  </section>
-
+  <nav class="tabs" role="tablist">
+    <button class="on" data-tab="flips">📈 Flips conseillés</button>
+    <button data-tab="all">🧺 Tout le Bazaar</button>
+    <button data-tab="fav">★ Favoris <span id="favCount"></span></button>
+    <button data-tab="calc">🧮 Calculateur</button>
+  </nav>
   <section id="advice" class="advice"></section>
 
   <main>

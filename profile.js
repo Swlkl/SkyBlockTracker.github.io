@@ -66,14 +66,13 @@ function renderProfile(u, p) {
   const tier = L < 100 ? "debutant" : L < 200 ? "inter" : L < 320 ? "avance" : "expert";
 
   const C = 163.4;
-  $("#pfBody").innerHTML = `<div class="card">
+  $("#pfBody").innerHTML = `<div class="pf">
     <div class="hd">
       <img src="https://mc-heads.net/avatar/${esc(u.id)}/64" alt="" onerror="this.remove()">
       <div class="grow"><h2>${esc(u.name)}</h2><small>Profil « ${esc(p.cute_name || "?")} »</small></div>
       <svg class="ring" viewBox="0 0 64 64" role="img" aria-label="Niveau SkyBlock ${L}"><circle cx="32" cy="32" r="26" fill="none" stroke="var(--line)" stroke-width="6"/>
         <circle cx="32" cy="32" r="26" fill="none" stroke="var(--gold)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(pr * C).toFixed(1)} ${C}" transform="rotate(-90 32 32)"/>
         <text x="32" y="39" text-anchor="middle">${L}</text></svg>
-      <button id="pfOut">Déconnecter</button>
     </div>
     <div class="kpis">
       <div class="kpi"><small>Bourse</small><b>${fmt(purse)}</b></div>
@@ -87,6 +86,7 @@ function renderProfile(u, p) {
       <div><span class="lbl">Slayers (XP)</span><div class="chips">${sl.length ? sl.map(([n, x]) => `<span class="tag">${n} ${fmt(x)}</span>`).join("") : `<span class="sub">Aucun</span>`}</div></div>
     </div>
     <p class="tip">Conseils réglés sur le niveau <b>${LEVELS[tier].label}</b> (niveau SkyBlock ${L}) avec un budget de ${fmt(purse + bank)}.${weak ? ` Ta compétence la plus faible : ${weak.fr} (niv. ${Math.floor(weak.l)}).` : ""}</p>
+    <button id="pfOut" class="link">Déconnecter</button>
   </div>`;
   $("#pfOut").onclick = () => { localStorage.removeItem("pf"); SS.removeItem("pf"); $("#pfBody").innerHTML = ""; $("#connect").hidden = false; $("#pfKey").value = ""; };
   document.querySelector(`[data-l="${tier}"]`).click();
