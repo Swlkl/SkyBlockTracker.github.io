@@ -124,15 +124,17 @@ async function load() {
 async function loadNames() {
   try {
     const j = await (await fetch(API.replace("skyblock/", "resources/skyblock/items"))).json();
+    state.items = j.items || [];
     (j.items || []).forEach(i => { state.names[i.id] = i.name; state.mat[i.id] = i.material; });
     compute(); render(); renderAlerts();
+    if (!$("#crafts").hidden) crReset();
   } catch {}
 }
 
 // Événements
 document.querySelector(".tabs").onclick = e => { const t = e.target.closest("button")?.dataset.tab; if (!t) return;
   state.tab = t; document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
-  const nt = t === "calc"; $("#advice").hidden = nt; $("#calc").hidden = t !== "calc"; $("#tableWrap").hidden = $("#tableTools").hidden = nt; render(); };
+  const nt = t === "calc" || t === "crafts"; $("#advice").hidden = nt; $("#calc").hidden = t !== "calc"; $("#crafts").hidden = t !== "crafts"; if (t === "crafts") crInit(); $("#tableWrap").hidden = $("#tableTools").hidden = nt; render(); };
 $("#tableWrap").onclick = e => {
   const th = e.target.closest("th[data-k]"), st = e.target.closest(".star"), cr = e.target.closest("[data-craft]");
   if (cr) openCraft(cr.dataset.craft);

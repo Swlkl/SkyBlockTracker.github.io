@@ -104,3 +104,8 @@ dialog form{text-align:right;margin-top:10px}
 @media(max-width:520px){.opts{grid-template-columns:1fr}}
 /* mobile : barre latérale en haut, hauteur libre */
 @media(max-width:900px){body{max-width:100%}.side{height:auto}}
+
+/* ---- v5 : liste des crafts ---- */
+.tag.farm{color:#6cb6ff;border-color:#6cb6ff}
+.opts{grid-template-columns:repeat(auto-fit,minmax(125px,1fr))}
+#crMore{margin-top:10px}

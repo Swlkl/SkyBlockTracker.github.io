@@ -42,6 +42,7 @@
     <button class="on" data-tab="flips">📈 Flips conseillés</button>
     <button data-tab="all">🧺 Tout le Bazaar</button>
     <button data-tab="fav">★ Favoris <span id="favCount"></span></button>
+    <button data-tab="crafts">🔨 Crafts</button>
     <button data-tab="calc">🧮 Calculateur</button>
   </nav>
   <section id="advice" class="advice"></section>
@@ -54,6 +55,18 @@
       <button id="csv">Exporter CSV</button>
     </div>
     <div class="wrap" id="tableWrap"></div>
+    <div id="crafts" hidden class="card">
+      <h2>Tous les crafts</h2>
+      <p class="sub">Clique sur un objet pour savoir s'il vaut mieux l'acheter, le crafter ou farmer les ingrédients.</p>
+      <div class="tools">
+        <input id="crSearch" type="search" placeholder="Rechercher un craft">
+        <select id="crCat"><option value="">Tous</option><option value="arme">Armes</option><option value="armure">Armures</option><option value="outil">Outils</option><option value="access">Accessoires</option><option value="autre">Autres</option></select>
+        <label>Ton gain de farm (coins/h) <input id="crRate" type="text"></label>
+      </div>
+      <div class="wrap"><table id="crTable"></table></div>
+      <p id="crNote" class="sub"></p>
+      <button id="crMore">Voir plus</button>
+    </div>
     <div id="calc" hidden class="card">
       <h2>Calculateur de flip</h2>
       <div class="grid">
