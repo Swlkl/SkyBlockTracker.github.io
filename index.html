@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bazaar Compass – Conseils et flips pour Hypixel SkyBlock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Bazaar Compass</h1>
+    <p class="sub">Trouve les flips rentables du Bazaar SkyBlock, adaptés à ton niveau et à ton budget.</p>
+  </div>
+  <div class="status">
+    <span id="status">Chargement…</span>
+    <button id="refresh" title="Actualiser maintenant">Actualiser</button>
+    <button id="theme" title="Changer de thème">Thème</button>
+  </div>
+</header>
+
+<section class="profile" aria-label="Ton profil">
+  <div class="levels" id="levels" role="radiogroup" aria-label="Niveau de jeu"></div>
+  <label>Budget (coins)
+    <input id="budget" type="text" inputmode="numeric" value="500k">
+  </label>
+  <label>Taxe de vente (%)
+    <select id="tax">
+      <option value="1.25">1,25 % (par défaut)</option>
+      <option value="1.125">1,125 % (Bazaar Flipper I)</option>
+      <option value="1">1 % (Bazaar Flipper II)</option>
+    </select>
+  </label>
+</section>
+
+<section id="advice" class="advice"></section>
+
+<nav class="tabs" role="tablist">
+  <button class="on" data-tab="flips">Flips conseillés</button>
+  <button data-tab="all">Tout le Bazaar</button>
+  <button data-tab="fav">Favoris <span id="favCount"></span></button>
+  <button data-tab="calc">Calculateur</button>
+</nav>
+
+<main>
+  <div id="tableTools" class="tools">
+    <input id="search" type="search" placeholder="Rechercher un objet (ex : enchanted)">
+    <label>Marge min. <input id="minPct" type="number" value="2" min="0" step="0.5"> %</label>
+    <label class="chk"><input id="hideSus" type="checkbox" checked> Masquer les prix suspects</label>
+    <button id="csv">Exporter en CSV</button>
+  </div>
+  <div class="wrap" id="tableWrap"></div>
+
+  <div id="calc" hidden class="calc">
+    <h2>Calculateur de flip</h2>
+    <p class="sub">Entre un prix d'achat et de vente pour connaître ton bénéfice réel après taxe.</p>
+    <div class="grid">
+      <label>Prix d'achat (ordre d'achat)<input id="cBuy" type="text" value="1000"></label>
+      <label>Prix de vente (ordre de vente)<input id="cSell" type="text" value="1100"></label>
+      <label>Quantité<input id="cQty" type="text" value="1k"></label>
+    </div>
+    <div id="cOut" class="out"></div>
+  </div>
+</main>
+
+<section class="alerts">
+  <h2>Alerte de prix</h2>
+  <p class="sub">Garde cet onglet ouvert : tu seras prévenu quand un objet atteint ton prix.</p>
+  <div class="tools">
+    <select id="alItem"></select>
+    <select id="alDir"><option value="below">descend sous</option><option value="above">monte au-dessus de</option></select>
+    <input id="alPrice" type="text" placeholder="Prix (ex : 12k)">
+    <button id="alAdd">Ajouter l'alerte</button>
+  </div>
+  <ul id="alList"></ul>
+</section>
+
+<footer>
+  Données : API publique Hypixel (Bazaar), actualisées toutes les 60 s. Projet non affilié à Hypixel Inc.
+  Les estimations ne garantissent aucun gain : les prix bougent vite.
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
