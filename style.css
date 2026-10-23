@@ -110,11 +110,12 @@ dialog form{text-align:right;margin-top:10px}
 .opts{grid-template-columns:repeat(auto-fit,minmax(125px,1fr))}
 #crMore{margin-top:10px}
 
-/* ---- v6 : table de craft ---- */
+/* ---- v6 : table de craft (style Minecraft) ---- */
 .ctable{display:flex;align-items:center;justify-content:center;gap:18px;margin:12px 0 16px}
-.g3{display:grid;grid-template-columns:repeat(3,48px);gap:3px;padding:8px;background:#8b8b8b;border:3px solid;border-color:#fff #555 #555 #fff;border-radius:4px}
-.slot{position:relative;width:48px;height:48px;background:#8b8b8b;border:2px solid;border-color:#373737 #fff #fff #373737;display:flex;align-items:center;justify-content:center}
-.slot .ic{width:34px;height:34px;margin:0}
-.slot i{position:absolute;right:2px;bottom:0;font:700 .8rem/1 "Atkinson Hyperlegible",sans-serif;color:#fff;font-style:normal;text-shadow:1px 1px 0 #3f3f3f}
-.ctable>.slot{width:56px;height:56px}.ctable>.slot .ic{width:40px;height:40px}
+.g3{display:grid;grid-template-columns:repeat(3,54px);gap:3px;padding:6px;background:#c6c6c6;border:2px solid;border-color:#fff #555 #555 #fff}
+.slot{position:relative;width:54px;height:54px;background:#8b8b8b;border:3px solid;border-color:#373737 #fff #fff #373737;display:flex;align-items:center;justify-content:center}
+.slot.clk{cursor:pointer}.slot.clk:hover{background:#a8a8a8}
+.slot .ic{width:36px;height:36px;margin:0}
+.slot i{position:absolute;right:2px;bottom:0;font:700 .85rem/1 "Atkinson Hyperlegible",sans-serif;color:#fff;font-style:normal;text-shadow:1px 1px 0 #3f3f3f}
+.ctable>.slot{width:62px;height:62px}.ctable>.slot .ic{width:42px;height:42px}
 .arrow{font-size:1.8rem;color:var(--mut)}

@@ -34,27 +34,35 @@ function verdict(a) {
   return ["Crafter", "safe", a.P != null ? `crafter coûte ${fmt(a.W)} contre ${fmt(a.P)} à l'achat.` : `farmer prendrait ~${tm(fh)} : achète les ingrédients.`];
 }
 
-async function openCraft(id) {
+const backBtn = () => state.hist.length ? `<button class="link" data-back>← Retour : ${esc(name(state.hist[state.hist.length - 1]))}</button>` : "";
+async function openCraft(id, back) {
   const d = $("#craftDlg"), b = $("#craftBody");
-  b.innerHTML = "<p>Chargement de la recette…</p>"; if (!d.open) d.showModal();
+  if (!d.open) { state.hist = []; state.cur = null; d.showModal(); }
+  else if (!back && state.cur && state.cur !== id) state.hist.push(state.cur);
+  state.cur = id; b.innerHTML = "<p>Chargement de la recette…</p>";
   const rec = await getRec(id);
-  if (!rec) { b.innerHTML = `<h2>${ic(id)}${esc(name(id))}</h2><p>Aucune recette de craft trouvée : cet objet se farme ou s'achète directement.</p>`; return; }
+  if (state.cur !== id) return;
+  if (!rec) { b.innerHTML = `${backBtn()}<h2>${ic(id)}${esc(name(id))}</h2><p>Pas de craft : cet objet de base se farme ou s'achète directement.</p>`; return; }
   showCraft(id, rec);
 }
+$("#craftBody").onclick = e => {
+  if (e.target.closest("[data-back]")) return openCraft(state.hist.pop(), true);
+  const c = e.target.closest("[data-craft]"); if (c) openCraft(c.dataset.craft);
+};
 
 function craftGrid(id, rec, cnt) {
-  const slot = (i, q, t) => `<div class="slot" ${i ? `title="${esc(name(i))}${q ? " ×" + q : ""}"` : ""}>${i ? ic(i) : ""}${q > 1 ? `<i>${q}</i>` : ""}</div>`;
+  const slot = (i, q, link) => `<div class="slot${link ? " clk" : ""}" ${i ? `title="${esc(name(i))}${q ? " ×" + q : ""}${link ? " : voir le craft" : ""}"` : ""} ${link ? `data-craft="${i}"` : ""}>${i ? ic(i) : ""}${q > 1 ? `<i>${q}</i>` : ""}</div>`;
   let cells = "";
-  for (const r of "ABC") for (const n of "123") { const m = (rec[r + n] || "").match(/^(.*):([\d.]+)$/); cells += m ? slot(m[1], parseFloat(m[2])) : slot(); }
+  for (const r of "ABC") for (const n of "123") { const m = (rec[r + n] || "").match(/^(.*):([\d.]+)$/); cells += m ? slot(m[1], parseFloat(m[2]), true) : slot(); }
   return `<div class="ctable"><div class="g3">${cells}</div><span class="arrow">➜</span>${slot(id, cnt)}</div>`;
 }
 
 function showCraft(id, rec) {
   const a = analyse(id, rec), tax = parseFloat($("#tax").value) / 100;
-  $("#craftBody").innerHTML = `<h2>${ic(id)}${esc(name(id))} <small>×${a.cnt}</small></h2>
+  $("#craftBody").innerHTML = `${backBtn()}<h2>${ic(id)}${esc(name(id))} <small>×${a.cnt}</small></h2>
     ${craftGrid(id, rec, a.cnt)}
     <table><thead><tr><th>Ingrédient</th><th>Qté</th><th>Ordre</th><th>Instant</th></tr></thead><tbody>
-    ${a.L.map(x => `<tr><td>${ic(x.i)}${esc(name(x.i))}</td><td>${fmt(x.q)}</td><td>${x.v ? fmt(x.v.sellPrice + 0.1) : "–"}</td><td>${x.v ? fmt(x.v.buyPrice) : "–"}</td></tr>`).join("")}</tbody></table>
+    ${a.L.map(x => `<tr><td><button class="nm" data-craft="${x.i}">${ic(x.i)}${esc(name(x.i))}</button></td><td>${fmt(x.q)}</td><td>${x.v ? fmt(x.v.sellPrice + 0.1) : "–"}</td><td>${x.v ? fmt(x.v.buyPrice) : "–"}</td></tr>`).join("")}</tbody></table>
     ${a.miss.length ? `<p class="msg">Hors Bazaar : ${a.miss.map(m => esc(name(m))).join(", ")}. Non inclus dans les totaux.</p>` : ""}
     <label class="inl">Ton gain de farm (coins/h) <input id="fRate" type="text" value="${state.farm || FARM[state.level]}"></label>
     <div id="cRes"></div>`;
