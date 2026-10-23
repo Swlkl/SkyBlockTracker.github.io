@@ -27,8 +27,7 @@
     <div id="pfBody"></div>
   </section>
   <div class="box">
-    <span class="lbl">Niveau de jeu</span>
-    <div class="levels" id="levels" role="radiogroup"></div>
+    <div class="lvl">Niveau détecté : <b id="lvlName"></b><small id="lvlWhy"></small></div>
     <label>Budget (coins)<input id="budget" type="text" inputmode="numeric" value="100k"></label>
     <label>Taxe de vente
       <select id="tax"><option value="1.25">1,25 %</option><option value="1.125">1,125 % (Flipper I)</option><option value="1">1 % (Flipper II)</option></select>
@@ -80,7 +79,9 @@
   <footer>Données : API publique Hypixel. Projet non affilié à Hypixel Inc. Les estimations ne garantissent aucun gain.</footer>
 </div>
 </div>
+<dialog id="craftDlg"><div id="craftBody"></div><form method="dialog"><button>Fermer</button></form></dialog>
 <script src="app.js"></script>
 <script src="profile.js"></script>
+<script src="craft.js"></script>
 </body>
 </html>

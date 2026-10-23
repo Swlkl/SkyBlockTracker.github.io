@@ -88,8 +88,8 @@ function renderProfile(u, p) {
     <p class="tip">Conseils réglés sur le niveau <b>${LEVELS[tier].label}</b> (niveau SkyBlock ${L}) avec un budget de ${fmt(purse + bank)}.${weak ? ` Ta compétence la plus faible : ${weak.fr} (niv. ${Math.floor(weak.l)}).` : ""}</p>
     <button id="pfOut" class="link">Déconnecter</button>
   </div>`;
-  $("#pfOut").onclick = () => { localStorage.removeItem("pf"); SS.removeItem("pf"); $("#pfBody").innerHTML = ""; $("#connect").hidden = false; $("#pfKey").value = ""; };
-  document.querySelector(`[data-l="${tier}"]`).click();
+  $("#pfOut").onclick = () => { localStorage.removeItem("pf"); SS.removeItem("pf"); $("#pfBody").innerHTML = ""; $("#connect").hidden = false; $("#pfKey").value = ""; state.sb = null; autoTier(); };
+  state.sb = L; setTier(tier);
   if (purse + bank > 0) { $("#budget").value = Math.round(purse + bank); $("#budget").dispatchEvent(new Event("input")); }
 }
 

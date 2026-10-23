@@ -24,8 +24,20 @@ const store = {
   set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 };
 const state = { level: store.get("level", "debutant"), tab: "flips", rows: [], names: {}, fav: store.get("fav", []),
-  alerts: store.get("alerts", []), sort: "gainH", asc: false };
+  alerts: store.get("alerts", []), mat: {}, sb: null, sort: "gainH", asc: false };
 
+function setTier(t) { state.level = t; store.set("level", t); renderAdvice(); compute(); render(); }
+function autoTier() { if (state.sb != null) return; const b = parseNum($("#budget").value) || 0; setTier(b < 1e6 ? "debutant" : b < 2e7 ? "inter" : b < 2e8 ? "avance" : "expert"); }
+const TEX = "https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.21.4/assets/minecraft/textures/";
+const LEG = { RAW_FISH: "cod", PORK: "porkchop", GRILLED_PORK: "cooked_porkchop", RAW_CHICKEN: "chicken", RAW_BEEF: "beef", SULPHUR: "gunpowder", INK_SACK: "ink_sac", LOG: "oak_log", LOG_2: "acacia_log", WOOD: "oak_planks", NETHER_STALK: "nether_wart", MELON: "melon_slice", CARROT_ITEM: "carrot", POTATO_ITEM: "potato", SEEDS: "wheat_seeds", SNOW_BALL: "snowball", EYE_OF_ENDER: "ender_eye", EXP_BOTTLE: "experience_bottle", WATER_LILY: "lily_pad", ENDER_STONE: "end_stone", SPECKLED_MELON: "glistering_melon_slice", SKULL_ITEM: "player_head" };
+function ic(id) {
+  const m = (state.mat[id] || id).toUpperCase(), f = /^ENCHANTMENT_/.test(id) ? "enchanted_book" : LEG[m] || m.toLowerCase();
+  return `<img class="ic${id.startsWith("ENCHANTED_") ? " gl" : ""}" src="${TEX}item/${f}.png" data-f="${f}" alt="" loading="lazy" onerror="icErr(this)">`;
+}
+function icErr(i) {
+  if (!i.dataset.s) { i.dataset.s = 1; i.src = TEX + "block/" + i.dataset.f + ".png"; return; }
+  i.onerror = null; i.src = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect width="16" height="16" rx="3" fill="#778"/><text x="8" y="12" font-size="10" text-anchor="middle" fill="#fff">?</text></svg>');
+}
 const parseNum = s => {
   const m = String(s).trim().toLowerCase().replace(/[\s,]/g, "").match(/^([\d.]+)([kmb]?)$/);
   return m ? parseFloat(m[1]) * ({ "": 1, k: 1e3, m: 1e6, b: 1e9 })[m[2]] : NaN;
@@ -69,7 +81,7 @@ function render() {
   $("#favCount").textContent = state.fav.length ? `(${state.fav.length})` : "";
   const head = "<th></th>" + COLS.map(([k, l]) => `<th data-k="${k}" class="${state.sort === k ? "s " + (state.asc ? "asc" : "") : ""}">${l}</th>`).join("");
   const body = rows.slice(0, 300).map(r => `<tr><td><button class="star ${state.fav.includes(r.id) ? "on" : ""}" data-id="${r.id}" aria-label="Favori">${state.fav.includes(r.id) ? "★" : "☆"}</button></td>
-    <td>${esc(r.name)}</td><td>${fmt(r.buyP)}</td><td>${fmt(r.sellP)}</td><td class="pos">+${fmt(r.profit)}</td>
+    <td><button class="nm" data-craft="${r.id}" title="Voir le craft">${ic(r.id)}${esc(r.name)}</button></td><td>${fmt(r.buyP)}</td><td>${fmt(r.sellP)}</td><td class="pos">+${fmt(r.profit)}</td>
     <td class="${r.pct > 35 ? "neg" : "pos"}">${r.pct.toFixed(1)} %</td><td>${fmt(r.weekly)}</td>
     <td><span class="tag ${r.risk}">${RISK[r.risk]}${r.sus ? " · suspect" : ""}</span></td><td><b>${fmt(r.gainH)}</b></td></tr>`).join("");
   $("#tableWrap").innerHTML = `<table><thead><tr>${head}</tr></thead><tbody>${body || `<tr><td colspan="9">Aucun résultat. Baisse la marge minimale ou change d'onglet.</td></tr>`}</tbody></table>`;
@@ -79,7 +91,7 @@ function renderAdvice() {
   const l = LEVELS[state.level];
   $("#advice").innerHTML = `<h2>Conseils pour le niveau ${l.label}</h2>
     <p>Objets affichés : prix d'achat ≤ ${fmt(l.maxPrice)} et au moins ${fmt(l.minVol)} échanges par semaine.</p><ul>${l.tips.map(t => `<li>${t}</li>`).join("")}</ul>`;
-  $("#levels").innerHTML = Object.entries(LEVELS).map(([k, v]) => `<button data-l="${k}" class="${k === state.level ? "on" : ""}" role="radio" aria-checked="${k === state.level}">${v.label}</button>`).join("");
+  $("#lvlName").textContent = l.label; $("#lvlWhy").textContent = state.sb != null ? ` (niveau SkyBlock ${state.sb})` : " (d'après ton budget, connecte-toi pour l'affiner)";
 }
 
 function renderAlerts() {
@@ -112,25 +124,23 @@ async function load() {
 async function loadNames() {
   try {
     const j = await (await fetch(API.replace("skyblock/", "resources/skyblock/items"))).json();
-    (j.items || []).forEach(i => state.names[i.id] = i.name);
+    (j.items || []).forEach(i => { state.names[i.id] = i.name; state.mat[i.id] = i.material; });
     compute(); render(); renderAlerts();
   } catch {}
 }
 
 // Événements
-$("#levels").onclick = e => { const l = e.target.dataset.l; if (!l) return;
-  state.level = l; store.set("level", l); $("#budget").value = fmt(LEVELS[l].budget).replace(/\s/g, "").replace("Md", "b").replace("M", "m").replace("k", "k");
-  renderAdvice(); compute(); render(); };
 document.querySelector(".tabs").onclick = e => { const t = e.target.closest("button")?.dataset.tab; if (!t) return;
   state.tab = t; document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
   const nt = t === "calc"; $("#advice").hidden = nt; $("#calc").hidden = t !== "calc"; $("#tableWrap").hidden = $("#tableTools").hidden = nt; render(); };
 $("#tableWrap").onclick = e => {
-  const th = e.target.closest("th[data-k]"), st = e.target.closest(".star");
+  const th = e.target.closest("th[data-k]"), st = e.target.closest(".star"), cr = e.target.closest("[data-craft]");
+  if (cr) openCraft(cr.dataset.craft);
   if (th) { state.asc = state.sort === th.dataset.k ? !state.asc : false; state.sort = th.dataset.k; render(); }
   if (st) { const id = st.dataset.id; state.fav = state.fav.includes(id) ? state.fav.filter(f => f !== id) : [...state.fav, id]; store.set("fav", state.fav); render(); }
 };
 ["search", "minPct", "hideSus"].forEach(i => $("#" + i).oninput = render);
-["budget", "tax"].forEach(i => $("#" + i).oninput = () => { compute(); render(); });
+["budget", "tax"].forEach(i => $("#" + i).oninput = () => { autoTier(); compute(); render(); });
 $("#refresh").onclick = load;
 $("#theme").onclick = () => { const t = document.documentElement.dataset.theme === "light" ? "dark" : "light"; document.documentElement.dataset.theme = t; store.set("theme", t); };
 $("#csv").onclick = () => {
@@ -151,5 +161,5 @@ $("#alList").onclick = e => { const i = e.target.dataset.del; if (i === undefine
 
 document.documentElement.dataset.theme = store.get("theme", "dark");
 $("#budget").value = "100k";
-renderAdvice(); renderAlerts(); calc(); load(); loadNames();
+autoTier(); renderAlerts(); calc(); load(); loadNames();
 setInterval(load, 60000);
