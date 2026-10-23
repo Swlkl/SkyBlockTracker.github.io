@@ -42,9 +42,17 @@ async function openCraft(id) {
   showCraft(id, rec);
 }
 
+function craftGrid(id, rec, cnt) {
+  const slot = (i, q, t) => `<div class="slot" ${i ? `title="${esc(name(i))}${q ? " ×" + q : ""}"` : ""}>${i ? ic(i) : ""}${q > 1 ? `<i>${q}</i>` : ""}</div>`;
+  let cells = "";
+  for (const r of "ABC") for (const n of "123") { const m = (rec[r + n] || "").match(/^(.*):([\d.]+)$/); cells += m ? slot(m[1], parseFloat(m[2])) : slot(); }
+  return `<div class="ctable"><div class="g3">${cells}</div><span class="arrow">➜</span>${slot(id, cnt)}</div>`;
+}
+
 function showCraft(id, rec) {
   const a = analyse(id, rec), tax = parseFloat($("#tax").value) / 100;
   $("#craftBody").innerHTML = `<h2>${ic(id)}${esc(name(id))} <small>×${a.cnt}</small></h2>
+    ${craftGrid(id, rec, a.cnt)}
     <table><thead><tr><th>Ingrédient</th><th>Qté</th><th>Ordre</th><th>Instant</th></tr></thead><tbody>
     ${a.L.map(x => `<tr><td>${ic(x.i)}${esc(name(x.i))}</td><td>${fmt(x.q)}</td><td>${x.v ? fmt(x.v.sellPrice + 0.1) : "–"}</td><td>${x.v ? fmt(x.v.buyPrice) : "–"}</td></tr>`).join("")}</tbody></table>
     ${a.miss.length ? `<p class="msg">Hors Bazaar : ${a.miss.map(m => esc(name(m))).join(", ")}. Non inclus dans les totaux.</p>` : ""}
