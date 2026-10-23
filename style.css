@@ -87,3 +87,20 @@ details summary{cursor:pointer;color:var(--mut);margin-top:6px}
 .side .hd img{width:44px;height:44px}.side .ring{width:54px;height:54px}.side .hd h2{font-size:1.1rem}
 .side .tip{font-size:.8rem}
 .link{background:none;border:0;color:var(--mut);padding:4px 0;text-decoration:underline;font-size:.8rem}
+
+/* ---- v4 : icônes, niveau auto, craft ---- */
+.ic{width:24px;height:24px;image-rendering:pixelated;vertical-align:middle;margin-right:8px}
+.gl{filter:drop-shadow(0 0 3px #b66cff)}
+.nm{background:none;border:0;padding:0;color:var(--tx);text-align:left;font:inherit}.nm:hover{color:var(--gold);text-decoration:underline}
+.lvl{font-size:.85rem;color:var(--mut)}.lvl b{color:var(--gold)}.lvl small{display:block}
+dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:14px;width:min(560px,94vw);padding:18px}
+dialog::backdrop{background:#000a}dialog h2 small{color:var(--mut);font-size:.8em}
+dialog table th,dialog table td{padding:6px 8px}dialog th{position:static;cursor:default}
+.inl{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:12px 0;color:var(--mut);font-size:.9rem}.inl input{width:130px}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.opt{border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}
+.opt.best{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,transparent)}.opt span,.opt small{color:var(--mut);font-size:.8rem}
+dialog form{text-align:right;margin-top:10px}
+@media(max-width:520px){.opts{grid-template-columns:1fr}}
+/* mobile : barre latérale en haut, hauteur libre */
+@media(max-width:900px){body{max-width:100%}.side{height:auto}}
