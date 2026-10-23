@@ -1,22 +1,37 @@
 "use strict";
-// Crafts : acheter l'objet fini, crafter (ingrédients achetés) ou farmer.
+// Fiche objet : recette(s), prix, forge, utilisations et conseil (acheter / crafter / farmer).
 const NEU = "https://raw.githubusercontent.com/NotEnoughUpdates/NotEnoughUpdates-REPO/master/items/";
 const FARM = { debutant: 150e3, inter: 800e3, avance: 3e6, expert: 1e7 };
 const GROUPS = { arme: ["SWORD", "LONGSWORD", "BOW", "WAND", "FISHING_WEAPON", "GAUNTLET"], armure: ["HELMET", "CHESTPLATE", "LEGGINGS", "BOOTS"],
   outil: ["PICKAXE", "AXE", "SHOVEL", "HOE", "FISHING_ROD", "DRILL", "SHEARS"], access: ["ACCESSORY", "HATCCESSORY"] };
+const RAR = { COMMON: ["Commun", "#d0d0d0"], UNCOMMON: ["Peu commun", "#55ff55"], RARE: ["Rare", "#7b7bff"], EPIC: ["Épique", "#c04cc0"], LEGENDARY: ["Légendaire", "#ffaa00"], MYTHIC: ["Mythique", "#ff55ff"], DIVINE: ["Divin", "#55ffff"], SPECIAL: ["Spécial", "#ff5555"], VERY_SPECIAL: ["Très spécial", "#ff5555"] };
+const OTHER = { npc_shop: "boutique PNJ", trade: "échange", drops: "butin de monstres", katgrade: "amélioration Kat", mob_drops: "butin de monstres", npc_shop_item: "boutique PNJ" };
 const tm = h => h < 1 ? Math.max(1, Math.round(h * 60)) + " min" : h.toFixed(1) + " h";
-state.rec = {}; state.cr = { list: [], pos: 0, shown: [] };
+state.info = {}; state.cr = { list: [], pos: 0, shown: [] }; state.usedC = {};
+const meta = id => { if (!state.metaMap && state.items?.length) state.metaMap = Object.fromEntries(state.items.map(i => [i.id, i])); return state.metaMap?.[id]; };
+const hasGrid = r => r && Object.keys(r).some(k => /^[A-C][1-3]$/.test(k) && r[k]);
 
-async function getRec(id) {
-  if (id in state.rec) return state.rec[id];
-  let r = null;
-  try { const x = await fetch(NEU + id + ".json"); if (x.ok) r = ((await x.json()).recipes || []).find(y => y.type === "crafting") || null; } catch {}
-  return state.rec[id] = r;
+async function getInfo(id) {
+  if (id in state.info) return state.info[id];
+  let o = null;
+  try {
+    const x = await fetch(NEU + id + ".json");
+    if (x.ok) {
+      const j = await x.json(), rs = j.recipes || [];
+      const crafts = rs.filter(r => (!r.type || r.type === "crafting") && hasGrid(r));
+      if (!crafts.length && hasGrid(j.recipe)) crafts.push(j.recipe);
+      o = { crafts, forge: rs.filter(r => r.type === "forge"), others: [...new Set(rs.map(r => r.type).filter(t => t && t !== "crafting" && t !== "forge"))],
+        lore: (j.lore || []).map(l => l.replace(/§./g, "")).filter(Boolean).slice(0, 9), wiki: (j.info || []).find(u => /^https?:/.test(u)), req: j.crafttext || "" };
+    }
+  } catch {}
+  return state.info[id] = o;
 }
+const getRec = async id => (await getInfo(id))?.crafts[0] || null;
+const parseIng = s => { const m = /^(.*):([\d.]+)$/.exec(s || ""); return m ? [m[1], parseFloat(m[2])] : null; };
 
 function analyse(id, rec) {
   const ing = {};
-  for (const k in rec) { const m = /^[A-C][1-3]$/.test(k) && rec[k] && rec[k].match(/^(.*):([\d.]+)$/); if (m) ing[m[1]] = (ing[m[1]] || 0) + parseFloat(m[2]); }
+  for (const k in rec) { const m = /^[A-C][1-3]$/.test(k) && parseIng(rec[k]); if (m) ing[m[0]] = (ing[m[0]] || 0) + m[1]; }
   const cnt = rec.count || 1, miss = [];
   const L = Object.entries(ing).map(([i, q]) => { const v = state.live?.[i] || state.live?.[i.replace(/-/g, ":")]; if (!v) miss.push(i); return { i, q, v }; });
   const ok = L.filter(x => x.v), me = state.live?.[id];
@@ -39,46 +54,84 @@ async function openCraft(id, back) {
   const d = $("#craftDlg"), b = $("#craftBody");
   if (!d.open) { state.hist = []; state.cur = null; d.showModal(); }
   else if (!back && state.cur && state.cur !== id) state.hist.push(state.cur);
-  state.cur = id; b.innerHTML = "<p>Chargement de la recette…</p>";
-  const rec = await getRec(id);
-  if (state.cur !== id) return;
-  if (!rec) { b.innerHTML = `${backBtn()}<h2>${ic(id)}${esc(name(id))}</h2><p>Pas de craft : cet objet de base se farme ou s'achète directement.</p>`; return; }
-  showCraft(id, rec);
+  state.cur = id; state.ri = 0; b.innerHTML = "<p>Chargement…</p>";
+  const info = await getInfo(id);
+  if (state.cur === id) sheet(id, info);
 }
 $("#craftBody").onclick = e => {
-  if (e.target.closest("[data-back]")) return openCraft(state.hist.pop(), true);
-  const c = e.target.closest("[data-craft]"); if (c) openCraft(c.dataset.craft);
+  const t = e.target;
+  if (t.closest("[data-back]")) return openCraft(state.hist.pop(), true);
+  const f = t.closest("[data-fav]");
+  if (f) { const id = f.dataset.fav; state.fav = state.fav.includes(id) ? state.fav.filter(x => x !== id) : [...state.fav, id]; store.set("fav", state.fav); f.classList.toggle("on"); render(); return; }
+  const r = t.closest("[data-ri]"); if (r) { state.ri = +r.dataset.ri; return sheet(state.cur, state.info[state.cur]); }
+  const c = t.closest("[data-craft]"); if (c) openCraft(c.dataset.craft);
 };
 
 function craftGrid(id, rec, cnt) {
-  const slot = (i, q, link) => `<div class="slot${link ? " clk" : ""}" ${i ? `title="${esc(name(i))}${q ? " ×" + q : ""}${link ? " : voir le craft" : ""}"` : ""} ${link ? `data-craft="${i}"` : ""}>${i ? ic(i) : ""}${q > 1 ? `<i>${q}</i>` : ""}</div>`;
+  const slot = (i, q, link) => `<div class="slot${link ? " clk" : ""}" ${i ? `title="${esc(name(i))}${q ? " ×" + q : ""}${link ? " : voir la fiche" : ""}"` : ""} ${link ? `data-craft="${i}"` : ""}>${i ? ic(i) : ""}${q > 1 ? `<i>${q}</i>` : ""}</div>`;
   let cells = "";
-  for (const r of "ABC") for (const n of "123") { const m = (rec[r + n] || "").match(/^(.*):([\d.]+)$/); cells += m ? slot(m[1], parseFloat(m[2]), true) : slot(); }
+  for (const r of "ABC") for (const n of "123") { const m = parseIng(rec[r + n]); cells += m ? slot(m[0], m[1], true) : slot(); }
   return `<div class="ctable"><div class="g3">${cells}</div><span class="arrow">➜</span>${slot(id, cnt)}</div>`;
 }
 
-function showCraft(id, rec) {
-  const a = analyse(id, rec), tax = parseFloat($("#tax").value) / 100;
-  $("#craftBody").innerHTML = `${backBtn()}<h2>${ic(id)}${esc(name(id))} <small>×${a.cnt}</small></h2>
-    ${craftGrid(id, rec, a.cnt)}
-    <table><thead><tr><th>Ingrédient</th><th>Qté</th><th>Ordre</th><th>Instant</th></tr></thead><tbody>
-    ${a.L.map(x => `<tr><td><button class="nm" data-craft="${x.i}">${ic(x.i)}${esc(name(x.i))}</button></td><td>${fmt(x.q)}</td><td>${x.v ? fmt(x.v.sellPrice + 0.1) : "–"}</td><td>${x.v ? fmt(x.v.buyPrice) : "–"}</td></tr>`).join("")}</tbody></table>
-    ${a.miss.length ? `<p class="msg">Hors Bazaar : ${a.miss.map(m => esc(name(m))).join(", ")}. Non inclus dans les totaux.</p>` : ""}
-    <label class="inl">Ton gain de farm (coins/h) <input id="fRate" type="text" value="${state.farm || FARM[state.level]}"></label>
-    <div id="cRes"></div>`;
-  const res = () => {
-    state.farm = parseNum($("#fRate").value) || FARM[state.level];
-    const [best, cls, why] = verdict(a), fh = a.W / state.farm;
-    const card = (n, k, t, c) => `<div class="opt ${best === n ? "best" : ""}"><b>${k}</b><span>${t}</span><small>${c}</small></div>`;
-    const sell = state.live?.[id] ? (state.live[id].buyPrice - 0.1) * (1 - tax) * a.cnt : null;
-    $("#cRes").innerHTML = `<div class="opts">${card("Acheter", "Acheter", "Objet fini", a.P != null ? fmt(a.P) + " coins" : "prix inconnu")}
-      ${card("Crafter", "Crafter", "Ordres d'achat", fmt(a.W) + " coins · ~" + tm(a.waitH))}
-      ${card("-", "Crafter vite", "Achat instantané", fmt(a.I) + " coins")}
-      ${card("Farmer", "Farmer", "Tu récoltes", "0 coin · ~" + tm(fh))}</div>
-      <p class="tip"><b>${best}</b> : ${why}${sell != null ? ` Revente nette ≈ ${fmt(sell)} coins.` : ""}</p>
-      <p class="sub">Estimation : ~5 % du flux du Bazaar pour l'attente ; le temps de farm dépend du gain que tu indiques.</p>`;
-  };
-  $("#fRate").oninput = res; res();
+function sheet(id, info) {
+  const m = meta(id), live = state.live?.[id], tax = parseFloat($("#tax").value) / 100, rar = RAR[m?.tier], fav = state.fav.includes(id);
+  let h = `${backBtn()}<div class="fh">${ic(id)}<div class="grow"><h2>${esc(name(id))}</h2><small>${rar ? `<span class="tag" style="color:${rar[1]};border-color:${rar[1]}">${rar[0]}</span> ` : ""}${m?.category ? esc(m.category.toLowerCase()) : ""}</small></div><button class="star ${fav ? "on" : ""}" data-fav="${id}" title="Favori">★</button></div>`;
+  if (info?.lore.length) h += `<p class="lore">${info.lore.map(esc).join("<br>")}</p>`;
+  if (info?.req) h += `<p class="sub">Prérequis : ${esc(info.req.replace(/^Requires: /, ""))}</p>`;
+  // Prix
+  if (live) {
+    const bp = live.sellPrice + 0.1, sp = live.buyPrice - 0.1, pr = sp * (1 - tax) - bp, wk = Math.min(live.buyMovingWeek, live.sellMovingWeek), npc = m?.npc_sell_price;
+    h += `<div class="kpis"><div class="kpi"><small>Achat (ordre)</small><b>${fmt(bp)}</b></div><div class="kpi"><small>Vente (ordre)</small><b>${fmt(sp)}</b></div>
+      <div class="kpi"><small>Marge après taxe</small><b class="${pr >= 0 ? "pos" : "neg"}">${pr >= 0 ? "+" : ""}${(pr / bp * 100).toFixed(1)} %</b></div><div class="kpi"><small>Volume / semaine</small><b>${fmt(wk)}</b></div>${npc ? `<div class="kpi"><small>Vente au PNJ</small><b>${fmt(npc)}</b></div>` : ""}</div>`;
+    if (npc) h += `<p class="sub">${npc > sp * (1 - tax) ? "Le PNJ paie plus que le Bazaar : inutile de le vendre au Bazaar." : `Le Bazaar paie mieux que le PNJ (≈ ×${(sp * (1 - tax) / npc).toFixed(1)}).`}</p>`;
+  } else h += `<p class="sub">Pas vendu au Bazaar.${state.bin?.[id] != null ? ` Prix le plus bas en enchère : <b>${fmt(state.bin[id])}</b>.` : ""}</p>`;
+  // Recettes
+  const cr = info?.crafts || [];
+  if (cr.length) {
+    const rec = cr[Math.min(state.ri, cr.length - 1)];
+    if (cr.length > 1) h += `<div class="rtabs">${cr.map((_, i) => `<button data-ri="${i}" class="${i === state.ri ? "on" : ""}">Recette ${i + 1}</button>`).join("")}</div>`;
+    const a = analyse(id, rec);
+    h += `<h3>Table de craft</h3>${craftGrid(id, rec, a.cnt)}
+      <table><thead><tr><th>Ingrédient</th><th>Qté</th><th>Ordre</th><th>Instant</th></tr></thead><tbody>
+      ${a.L.map(x => `<tr><td><button class="nm" data-craft="${x.i}">${ic(x.i)}${esc(name(x.i))}</button></td><td>${fmt(x.q)}</td><td>${x.v ? fmt(x.v.sellPrice + 0.1) : "–"}</td><td>${x.v ? fmt(x.v.buyPrice) : "–"}</td></tr>`).join("")}</tbody></table>
+      ${a.miss.length ? `<p class="msg">Hors Bazaar : ${a.miss.map(x => esc(name(x))).join(", ")}. Non inclus dans les totaux.</p>` : ""}
+      <label class="inl">Ton gain de farm (coins/h) <input id="fRate" type="text" value="${state.farm || FARM[state.level]}"></label><div id="cRes"></div>`;
+    state.curA = a;
+  } else h += `<h3>Obtention</h3><p>Pas de craft connu : cet objet se récolte, se farme ou s'obtient en butin.</p>`;
+  (info?.forge || []).forEach(f => {
+    const ins = (f.inputs || []).map(parseIng).filter(Boolean), cost = ins.reduce((s, [i, q]) => s + q * ((state.live?.[i]?.sellPrice || 0) + 0.1), 0);
+    h += `<h3>Forge</h3><p>${ins.map(([i, q]) => `<button class="nm" data-craft="${i}">${ic(i)}${esc(name(i))} ×${q}</button>`).join(" ")}<br><small class="sub">Durée ${tm((f.duration || 0) / 3600)} · coût des matériaux ≈ ${fmt(cost)}</small></p>`;
+  });
+  if (info?.others.length) h += `<p class="sub">Autres sources : ${[...new Set(info.others.map(t => OTHER[t] || t))].join(", ")}.</p>`;
+  h += `<h3>Sert à crafter</h3><div id="usedIn" class="chips"><span class="sub">Recherche…</span></div>`;
+  if (info?.wiki) h += `<p><a href="${esc(info.wiki)}" target="_blank" rel="noopener">Voir sur le wiki SkyBlock</a></p>`;
+  $("#craftBody").innerHTML = h;
+  if (cr.length) {
+    const a = state.curA, res = () => {
+      state.farm = parseNum($("#fRate").value) || FARM[state.level];
+      const [best, , why] = verdict(a), fh = a.W / state.farm;
+      const card = (n, k, t, c) => `<div class="opt ${best === n ? "best" : ""}"><b>${k}</b><span>${t}</span><small>${c}</small></div>`;
+      const sell = live ? (live.buyPrice - 0.1) * (1 - tax) * a.cnt : null;
+      $("#cRes").innerHTML = `<div class="opts">${card("Acheter", "Acheter", "Objet fini", a.P != null ? fmt(a.P) + " coins" : "prix inconnu")}${card("Crafter", "Crafter", "Ordres d'achat", fmt(a.W) + " coins · ~" + tm(a.waitH))}
+        ${card("-", "Crafter vite", "Achat instantané", fmt(a.I) + " coins")}${card("Farmer", "Farmer", "Tu récoltes", "0 coin · ~" + tm(fh))}</div>
+        <p class="tip"><b>${best}</b> : ${why}${sell != null ? ` Revente nette ≈ ${fmt(sell)} coins.` : ""}</p>
+        <p class="sub">Estimation : ~5 % du flux du Bazaar pour l'attente ; le temps de farm dépend du gain que tu indiques.</p>`;
+    };
+    $("#fRate").oninput = res; res();
+  }
+  showUsed(id);
+}
+
+// Objets (du Bazaar, de nom proche) dont la recette utilise cet objet.
+async function showUsed(id) {
+  const put = l => { if (state.cur === id) $("#usedIn").innerHTML = l.length ? l.slice(0, 14).map(k => `<button class="nm" data-craft="${k}">${ic(k)}${esc(name(k))}</button>`).join("") : '<span class="sub">Aucun craft trouvé parmi les objets proches.</span>'; };
+  if (state.usedC[id]) return put(state.usedC[id]);
+  const root = id.replace(/^ENCHANTED_/, "").replace(/_(ITEM|BLOCK)$/, "");
+  const cand = Object.keys(state.live || {}).filter(k => k !== id && k.includes(root)).slice(0, 40);
+  const infos = await Promise.all(cand.map(getInfo));
+  const uses = i => i && [...i.crafts.flatMap(r => Object.entries(r).filter(([k]) => /^[A-C][1-3]$/.test(k)).map(([, v]) => v)), ...i.forge.flatMap(f => f.inputs || [])].some(v => parseIng(v)?.[0] === id);
+  put(state.usedC[id] = cand.filter((k, j) => uses(infos[j])));
 }
 
 // ---- Liste des crafts ----

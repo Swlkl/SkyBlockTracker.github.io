@@ -119,3 +119,11 @@ dialog form{text-align:right;margin-top:10px}
 .slot i{position:absolute;right:2px;bottom:0;font:700 .85rem/1 "Atkinson Hyperlegible",sans-serif;color:#fff;font-style:normal;text-shadow:1px 1px 0 #3f3f3f}
 .ctable>.slot{width:62px;height:62px}.ctable>.slot .ic{width:42px;height:42px}
 .arrow{font-size:1.8rem;color:var(--mut)}
+
+/* ---- v7 : fiche objet ---- */
+.fh{display:flex;align-items:center;gap:12px;margin:6px 0 10px}.fh .ic{width:40px;height:40px;margin:0}.fh .grow{flex:1}.fh small{color:var(--mut)}
+.lore{color:var(--mut);font-size:.9rem;margin:.2rem 0 .6rem}
+dialog h3{font-family:"Bricolage Grotesque",sans-serif;font-size:1rem;margin:16px 0 6px;color:var(--gold)}
+dialog .kpis{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
+.rtabs{display:flex;gap:6px;margin:8px 0}.rtabs button{padding:5px 10px;font-size:.85rem}.rtabs button.on{background:var(--gold);color:#1b1f27;border-color:var(--gold)}
+dialog{max-height:90vh;overflow-y:auto}
