@@ -44,8 +44,8 @@ footer{color:var(--mut);font-size:.8rem;margin:28px 0 10px}
 @media(prefers-reduced-motion:no-preference){button{transition:border-color .15s}}
 
 /* ---- v2 : barre latérale, profil compact ---- */
-body{max-width:1400px;padding:16px}
-.shell{display:grid;grid-template-columns:250px 1fr;gap:20px;align-items:start}
+body{max-width:80%;padding:16px}
+.shell{display:grid;grid-template-columns:20% 1fr;gap:20px;align-items:start}
 .side{position:sticky;top:16px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(170deg,#1f2733,var(--panel) 60%);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 8px 24px #0004}
 :root[data-theme=light] .side{background:var(--panel);box-shadow:0 4px 14px #0001}
 .side h1{font-size:1.6rem}
@@ -77,7 +77,7 @@ details summary{cursor:pointer;color:var(--mut);margin-top:6px}
 @media(max-width:900px){.shell{grid-template-columns:1fr}.side{position:static}.side .tabs{flex-direction:row;overflow-x:auto}.cols{grid-template-columns:1fr}}
 
 /* ---- v3 : profil dans la barre latérale ---- */
-.side{max-height:calc(100vh - 32px);overflow-y:auto}
+.side{height:calc(100vh - 32px);overflow-y:auto}
 #connect{display:flex;flex-direction:column;gap:8px}#connect[hidden]{display:none}
 .side label{display:flex;flex-direction:column;gap:3px;font-size:.8rem;color:var(--mut)}
 .side label.chk{flex-direction:row;align-items:center;gap:6px}
