@@ -62,7 +62,9 @@ $("#craftBody").onclick = e => {
   const t = e.target;
   if (t.closest("[data-back]")) return openCraft(state.hist.pop(), true);
   const f = t.closest("[data-fav]");
-  if (f) { const id = f.dataset.fav; state.fav = state.fav.includes(id) ? state.fav.filter(x => x !== id) : [...state.fav, id]; store.set("fav", state.fav); f.classList.toggle("on"); render(); return; }
+  if (f) { const id = f.dataset.fav; state.fav = state.fav.includes(id) ? state.fav.filter(x => x !== id) : [...state.fav, id]; store.set("fav", state.fav); f.classList.toggle("on"); track(); render(); return; }
+  const al = t.closest("[data-al]");
+  if (al) { const p = state.live?.[al.dataset.al]?.buyPrice; if (p) { state.alerts.push({ id: al.dataset.al, dir: "below", price: Math.round(p * 0.95) }); store.set("alerts", state.alerts); renderAlerts(); al.textContent = "✓"; } return; }
   const r = t.closest("[data-ri]"); if (r) { state.ri = +r.dataset.ri; return sheet(state.cur, state.info[state.cur]); }
   const c = t.closest("[data-craft]"); if (c) openCraft(c.dataset.craft);
 };
@@ -76,7 +78,7 @@ function craftGrid(id, rec, cnt) {
 
 function sheet(id, info) {
   const m = meta(id), live = state.live?.[id], tax = parseFloat($("#tax").value) / 100, rar = RAR[m?.tier], fav = state.fav.includes(id);
-  let h = `${backBtn()}<div class="fh">${ic(id)}<div class="grow"><h2>${esc(name(id))}</h2><small>${rar ? `<span class="tag" style="color:${rar[1]};border-color:${rar[1]}">${rar[0]}</span> ` : ""}${m?.category ? esc(m.category.toLowerCase()) : ""}</small></div><button class="star ${fav ? "on" : ""}" data-fav="${id}" title="Favori">★</button></div>`;
+  let h = `${backBtn()}<div class="fh">${ic(id)}<div class="grow"><h2>${esc(name(id))}</h2><small>${rar ? `<span class="tag" style="color:${rar[1]};border-color:${rar[1]}">${rar[0]}</span> ` : ""}${m?.category ? esc(m.category.toLowerCase()) : ""}</small></div><button class="star ${fav ? "on" : ""}" data-fav="${id}" title="Favori">★</button><button class="star" data-al="${id}" title="Alerte si le prix baisse de 5 %">🔔</button></div>`;
   if (info?.lore.length) h += `<p class="lore">${info.lore.map(esc).join("<br>")}</p>`;
   if (info?.req) h += `<p class="sub">Prérequis : ${esc(info.req.replace(/^Requires: /, ""))}</p>`;
   // Prix
@@ -85,6 +87,7 @@ function sheet(id, info) {
     h += `<div class="kpis"><div class="kpi"><small>Achat (ordre)</small><b>${fmt(bp)}</b></div><div class="kpi"><small>Vente (ordre)</small><b>${fmt(sp)}</b></div>
       <div class="kpi"><small>Marge après taxe</small><b class="${pr >= 0 ? "pos" : "neg"}">${pr >= 0 ? "+" : ""}${(pr / bp * 100).toFixed(1)} %</b></div><div class="kpi"><small>Volume / semaine</small><b>${fmt(wk)}</b></div>${npc ? `<div class="kpi"><small>Vente au PNJ</small><b>${fmt(npc)}</b></div>` : ""}</div>`;
     if (npc) h += `<p class="sub">${npc > sp * (1 - tax) ? "Le PNJ paie plus que le Bazaar : inutile de le vendre au Bazaar." : `Le Bazaar paie mieux que le PNJ (≈ ×${(sp * (1 - tax) / npc).toFixed(1)}).`}</p>`;
+    const sk = spark(id, 220, 36); if (sk) h += `<p class="sub">Historique local : ${sk} ${chg(id).toFixed(1)} %</p>`;
   } else h += `<p class="sub">Pas vendu au Bazaar.${state.bin?.[id] != null ? ` Prix le plus bas en enchère : <b>${fmt(state.bin[id])}</b>.` : ""}</p>`;
   // Recettes
   const cr = info?.crafts || [];

@@ -115,7 +115,7 @@ async function load() {
     const r = await fetch(API + "bazaar"); const j = await r.json();
     if (!j.success) throw new Error();
     state.live = {}; state.raw = Object.entries(j.products).map(([id, p]) => (state.live[id] = p.quick_status, [id, p.quick_status]));
-    compute(); render(); checkAlerts();
+    compute(); render(); checkAlerts(); track(); dashRender();
     $("#status").textContent = "Mis à jour à " + new Date().toLocaleTimeString("fr-FR");
     if (!$("#alItem").options.length) $("#alItem").innerHTML = state.rows.concat().sort((a, b) => a.name.localeCompare(b.name)).map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join("");
   } catch { $("#status").textContent = "Erreur : l'API Hypixel ne répond pas. Réessaie dans un instant."; }
@@ -132,9 +132,7 @@ async function loadNames() {
 }
 
 // Événements
-document.querySelector(".tabs").onclick = e => { const t = e.target.closest("button")?.dataset.tab; if (!t) return;
-  state.tab = t; document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
-  const nt = t === "calc" || t === "crafts"; $("#advice").hidden = nt; $("#calc").hidden = t !== "calc"; $("#crafts").hidden = t !== "crafts"; if (t === "crafts") crInit(); $("#tableWrap").hidden = $("#tableTools").hidden = nt; render(); };
+document.querySelector(".tabs").onclick = e => { const t = e.target.closest("button")?.dataset.tab; if (t) showTab(t); };
 $("#tableWrap").onclick = e => {
   const th = e.target.closest("th[data-k]"), st = e.target.closest(".star"), cr = e.target.closest("[data-craft]");
   if (cr) openCraft(cr.dataset.craft);

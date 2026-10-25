@@ -39,15 +39,33 @@
 
 <div class="content">
   <nav class="tabs" role="tablist">
-    <button class="on" data-tab="flips">📈 Flips conseillés</button>
-    <button data-tab="all">🧺 Tout le Bazaar</button>
+    <button class="on" data-tab="dash">🏠 Accueil</button>
+    <button data-tab="flips">📈 Flips</button>
+    <button data-tab="all">🧺 Bazaar</button>
     <button data-tab="fav">★ Favoris <span id="favCount"></span></button>
     <button data-tab="crafts">🔨 Crafts</button>
-    <button data-tab="calc">🧮 Calculateur</button>
+    <button data-tab="journal">📒 Journal</button>
+    <button data-tab="calc">🧮 Calcul</button>
+    <button data-tab="alerts">🔔 Alertes</button>
+    <button id="cmdBtn" class="srch" title="Raccourci : Ctrl+K ou /">🔍 Rechercher <kbd>Ctrl K</kbd></button>
   </nav>
   <section id="advice" class="advice"></section>
 
   <main>
+    <div id="dash" class="dgrid"></div>
+    <div id="journal" hidden class="card">
+      <h2>Journal de flips</h2>
+      <p class="sub">Note tes flips pour suivre ton vrai bénéfice (taxe de vente incluse).</p>
+      <div class="tools">
+        <input id="jItem" list="jList" placeholder="Objet (ex : Enchanted Carrot)"><datalist id="jList"></datalist>
+        <input id="jBuy" type="text" placeholder="Prix d'achat" size="9"><input id="jSell" type="text" placeholder="Prix de vente" size="9"><input id="jQty" type="text" placeholder="Quantité" size="7">
+        <button id="jAdd" class="primary">Ajouter</button>
+      </div>
+      <p id="jMsg" class="msg"></p>
+      <div id="jSum" class="kpis"></div>
+      <div class="wrap"><table id="jTable"></table></div>
+      <p class="tools"><button id="jCsv">Exporter CSV</button><button id="jClear" class="link">Tout effacer</button></p>
+    </div>
     <div id="tableTools" class="tools">
       <input id="search" type="search" placeholder="Rechercher un objet">
       <label>Marge min. <input id="minPct" type="number" value="2" min="0" step="0.5"> %</label>
@@ -78,7 +96,7 @@
     </div>
   </main>
 
-  <section class="alerts card">
+  <section id="alertsSec" hidden class="alerts card">
     <h2>Alerte de prix</h2>
     <p class="sub">Garde cet onglet ouvert pour être prévenu.</p>
     <div class="tools">
@@ -92,9 +110,11 @@
   <footer>Données : API publique Hypixel. Projet non affilié à Hypixel Inc. Les estimations ne garantissent aucun gain.</footer>
 </div>
 </div>
+<dialog id="cmdDlg"><input id="cmdIn" type="search" placeholder="Rechercher un objet…" autocomplete="off"><ul id="cmdList"></ul><p class="sub">↑ ↓ pour choisir, Entrée pour ouvrir la fiche, Échap pour fermer.</p></dialog>
 <dialog id="craftDlg"><div id="craftBody"></div><form method="dialog"><button>Fermer</button></form></dialog>
 <script src="app.js"></script>
 <script src="profile.js"></script>
 <script src="craft.js"></script>
+<script src="dash.js"></script>
 </body>
 </html>

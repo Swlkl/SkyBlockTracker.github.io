@@ -127,3 +127,23 @@ dialog h3{font-family:"Bricolage Grotesque",sans-serif;font-size:1rem;margin:16p
 dialog .kpis{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
 .rtabs{display:flex;gap:6px;margin:8px 0}.rtabs button{padding:5px 10px;font-size:.85rem}.rtabs button.on{background:var(--gold);color:#1b1f27;border-color:var(--gold)}
 dialog{max-height:90vh;overflow-y:auto}
+
+/* ---- v8 : accueil, journal, recherche rapide ---- */
+.dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px;margin-bottom:16px}
+.dgrid[hidden],.card[hidden]{display:none}
+.dc{margin:0}.dc.wide{grid-column:1/-1}
+.dc h3{font-family:"Bricolage Grotesque",sans-serif;font-size:1rem;margin:0 0 10px;color:var(--gold)}
+.dc .kpis{margin:0}
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.rows li:last-child{border:0}.rows .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rows small{color:var(--mut);min-width:64px;text-align:right}
+.goal{display:flex;align-items:center;gap:14px}.goal .ring{width:76px;height:76px}.goal .ring text{font-size:15px}
+.inl2{font-size:.85rem;color:var(--mut)}.inl2 input{width:110px;padding:4px 8px}
+.srch{margin-left:auto;color:var(--tx)!important}.srch kbd{font:inherit;font-size:.7rem;border:1px solid var(--line);border-radius:5px;padding:0 5px;color:var(--mut)}
+#cmdDlg{width:min(520px,94vw);padding:14px;top:12vh;margin-top:0}
+#cmdIn{width:100%;font-size:1.1rem}
+#cmdList{list-style:none;margin:8px 0;padding:0}
+#cmdList li{display:flex;align-items:center;padding:8px 10px;border-radius:8px;cursor:pointer}
+#cmdList li.on,#cmdList li:hover{background:color-mix(in srgb,var(--gold) 16%,transparent)}
+.spark{flex:none}
