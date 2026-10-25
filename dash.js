@@ -1,14 +1,14 @@
 "use strict";
 // Accueil (tableau de bord), journal de flips, recherche rapide, historique local.
 const TABS = { dash: ["dash"], flips: ["advice", "tableTools", "tableWrap"], all: ["tableTools", "tableWrap"], fav: ["tableTools", "tableWrap"],
-  crafts: ["crafts"], journal: ["journal"], calc: ["calc"], alerts: ["alertsSec"] };
-const SECS = ["dash", "advice", "tableTools", "tableWrap", "crafts", "journal", "calc", "alertsSec"];
+  crafts: ["crafts"], plan: ["plan"], journal: ["journal"], calc: ["calc"], alerts: ["alertsSec"] };
+const SECS = ["dash", "advice", "tableTools", "tableWrap", "crafts", "plan", "journal", "calc", "alertsSec"];
 function showTab(t) {
   if (!TABS[t]) t = "dash";
   state.tab = t; store.set("tab", t);
   document.querySelectorAll(".tabs button[data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
   SECS.forEach(s => $("#" + s).hidden = !TABS[t].includes(s));
-  if (t === "crafts") crInit(); if (t === "dash") dashRender(); if (t === "journal") jrRender();
+  if (t === "crafts") crInit(); if (t === "dash") dashRender(); if (t === "journal") jrRender(); if (t === "plan") planInit();
   render();
 }
 

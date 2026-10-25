@@ -147,3 +147,8 @@ dialog{max-height:90vh;overflow-y:auto}
 #cmdList li{display:flex;align-items:center;padding:8px 10px;border-radius:8px;cursor:pointer}
 #cmdList li.on,#cmdList li:hover{background:color-mix(in srgb,var(--gold) 16%,transparent)}
 .spark{flex:none}
+
+/* ---- v9 : textures (têtes) et objectif ---- */
+.ic.hd{display:inline-block;image-rendering:pixelated}
+#plOut h3{font-family:"Bricolage Grotesque",sans-serif;color:var(--gold);margin:16px 0 8px}
+#plOut .kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}

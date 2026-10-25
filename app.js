@@ -30,14 +30,43 @@ function setTier(t) { state.level = t; store.set("level", t); renderAdvice(); co
 function autoTier() { if (state.sb != null) return; const b = parseNum($("#budget").value) || 0; setTier(b < 1e6 ? "debutant" : b < 2e7 ? "inter" : b < 2e8 ? "avance" : "expert"); }
 const TEX = "https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.21.4/assets/minecraft/textures/";
 const LEG = { RAW_FISH: "cod", PORK: "porkchop", GRILLED_PORK: "cooked_porkchop", RAW_CHICKEN: "chicken", RAW_BEEF: "beef", SULPHUR: "gunpowder", INK_SACK: "ink_sac", LOG: "oak_log", LOG_2: "acacia_log", WOOD: "oak_planks", NETHER_STALK: "nether_wart", MELON: "melon_slice", CARROT_ITEM: "carrot", POTATO_ITEM: "potato", SEEDS: "wheat_seeds", SNOW_BALL: "snowball", EYE_OF_ENDER: "ender_eye", EXP_BOTTLE: "experience_bottle", WATER_LILY: "lily_pad", ENDER_STONE: "end_stone", SPECKLED_MELON: "glistering_melon_slice", SKULL_ITEM: "player_head" };
+const TM = store.get("texmap", {}), SKIN = "https://textures.minecraft.net/texture/";
+const NEUI = "https://raw.githubusercontent.com/NotEnoughUpdates/NotEnoughUpdates-REPO/master/items/";
+const tex = id => { const m = (state.mat[id] || id).toUpperCase(); return /^ENCHANTMENT_/.test(id) ? "enchanted_book" : LEG[m] || m.toLowerCase(); };
 function ic(id) {
-  const m = (state.mat[id] || id).toUpperCase(), f = /^ENCHANTMENT_/.test(id) ? "enchanted_book" : LEG[m] || m.toLowerCase();
-  return `<img class="ic${id.startsWith("ENCHANTED_") ? " gl" : ""}" src="${TEX}item/${f}.png" data-f="${f}" alt="" loading="lazy" onerror="icErr(this)">`;
+  const t = TM[id], gl = id.startsWith("ENCHANTED_") ? " gl" : "";
+  if (t?.startsWith("h:")) { const u = `url(${SKIN}${t.slice(2)})`; return `<span class="ic hd${gl}" data-id="${id}" data-ok="1" style="background:${u} 14.2857% 14.2857%/800% 800% no-repeat,${u} 71.4286% 14.2857%/800% 800% no-repeat"></span>`; }
+  const f = t ? t.slice(2) : tex(id);
+  return `<img class="ic${gl}" src="${TEX}item/${f}.png" data-id="${id}" data-f="${f}"${t ? ' data-ok="1"' : ""} alt="" loading="lazy" onerror="icErr(this)">`;
 }
 function icErr(i) {
-  if (!i.dataset.s) { i.dataset.s = 1; i.src = TEX + "block/" + i.dataset.f + ".png"; return; }
+  const f = i.dataset.f, L = [`item/${f}`, `block/${f}`, `block/${f}_side`, `block/${f}_top`, `block/${f}_front`], n = +(i.dataset.s || 0) + 1;
+  i.dataset.s = n;
+  if (n < L.length) { i.src = TEX + L[n] + ".png"; return; }
   i.onerror = null; i.src = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect width="16" height="16" rx="3" fill="#778"/><text x="8" y="12" font-size="10" text-anchor="middle" fill="#fff">?</text></svg>');
 }
+// Résolution précise des textures (modèle moderne ou tête) via les données NEU, mise en cache locale.
+const tq = []; let tb = 0, tSave;
+async function resolveTex(id) {
+  if (TM[id] !== undefined) return;
+  TM[id] = "m:" + tex(id);
+  try {
+    const x = await fetch(NEUI + id + ".json");
+    if (x.ok) {
+      const j = await x.json(), nb = j.nbttag || "", mo = /ItemModel:"([^"]+)"/.exec(nb), sk = /Value:"([A-Za-z0-9+\/=]{20,})"/.exec(nb); let v;
+      if (sk && (mo?.[1] === "minecraft:player_head" || /skull/.test(j.itemid || ""))) { try { v = "h:" + JSON.parse(atob(sk[1])).textures.SKIN.url.split("/").pop(); } catch {} }
+      if (!v) { const m = mo?.[1]; v = "m:" + ((m && m.startsWith("minecraft:") ? m.slice(10) : (j.itemid || "").replace("minecraft:", "")) || tex(id)); }
+      TM[id] = v;
+    }
+  } catch {}
+  clearTimeout(tSave); tSave = setTimeout(() => store.set("texmap", TM), 800);
+  document.querySelectorAll(`.ic[data-id="${id}"]`).forEach(el => { el.outerHTML = ic(id); });
+}
+function qTex(id) { if (TM[id] !== undefined || tq.includes(id)) return; tq.push(id); pump(); }
+function pump() { while (tb < 8 && tq.length) { tb++; resolveTex(tq.shift()).finally(() => { tb--; pump(); }); } }
+const io = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { io.unobserve(e.target); qTex(e.target.dataset.id); } }), { rootMargin: "200px" }) : null;
+let scanT;
+new MutationObserver(() => { clearTimeout(scanT); scanT = setTimeout(() => document.querySelectorAll(".ic[data-id]:not([data-ok]):not([data-ob])").forEach(el => { el.dataset.ob = 1; io ? io.observe(el) : qTex(el.dataset.id); }), 120); }).observe(document.body, { childList: true, subtree: true });
 const parseNum = s => {
   const m = String(s).trim().toLowerCase().replace(/[\s,]/g, "").match(/^([\d.]+)([kmb]?)$/);
   return m ? parseFloat(m[1]) * ({ "": 1, k: 1e3, m: 1e6, b: 1e9 })[m[2]] : NaN;

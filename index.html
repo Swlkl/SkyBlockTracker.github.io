@@ -44,6 +44,7 @@
     <button data-tab="all">🧺 Bazaar</button>
     <button data-tab="fav">★ Favoris <span id="favCount"></span></button>
     <button data-tab="crafts">🔨 Crafts</button>
+    <button data-tab="plan">🎯 Objectif</button>
     <button data-tab="journal">📒 Journal</button>
     <button data-tab="calc">🧮 Calcul</button>
     <button data-tab="alerts">🔔 Alertes</button>
@@ -53,6 +54,17 @@
 
   <main>
     <div id="dash" class="dgrid"></div>
+    <div id="plan" hidden class="card">
+      <h2>Objectif de gain</h2>
+      <p class="sub">Dis combien tu veux gagner et avec quel objet : le site calcule la quantité, le capital et le temps estimé.</p>
+      <div class="grid">
+        <label>Combien veux-tu gagner (coins) ?<input id="plGoal" type="text" value="1m"></label>
+        <label>Avec quel objet ? (facultatif)<input id="plItem" list="plList" placeholder="Au choix : le site propose"><datalist id="plList"></datalist></label>
+        <label>Ton budget (coins)<input id="plBudget" type="text"></label>
+      </div>
+      <p class="tools"><button id="plGo" class="primary">Calculer mon plan</button></p>
+      <div id="plOut"></div>
+    </div>
     <div id="journal" hidden class="card">
       <h2>Journal de flips</h2>
       <p class="sub">Note tes flips pour suivre ton vrai bénéfice (taxe de vente incluse).</p>
@@ -115,6 +127,7 @@
 <script src="app.js"></script>
 <script src="profile.js"></script>
 <script src="craft.js"></script>
+<script src="plan.js"></script>
 <script src="dash.js"></script>
 </body>
 </html>
